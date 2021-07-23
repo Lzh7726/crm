@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace需要与接口权限定类名一致-->
+<mapper namespace="com.bjpowernode.crm.workbench.mapper.ChartsMapper">
+
+    <!--
+        resultType:
+            基本类型
+            对象
+            map
+        柱状图
+    -->
+    <select id="barVoEcharts" resultType="com.bjpowernode.crm.base.bean.BarVo">
+        select stage,count(*) num from tbl_tran group by stage order by stage
+    </select>
+
+    <!--饼状图-->
+    <select id="PieVoEcharts" resultType="com.bjpowernode.crm.base.bean.PieVo">
+        select stage name,count(*) value from tbl_tran group by stage order by stage
+    </select>
+</mapper>
+

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace需要与接口权限定类名一致-->
+<mapper namespace="com.bjpowernode.crm.settings.mapper.UserMapper">
+    <!--根据身份(用户名)查询用户-->
+    <select id="verifyPrincipal" resultType="user">
+        select * from tbl_user where loginAct=#{username}
+    </select>
+    <!--根据用户名查询用户的所有角色-->
+    <!--id:既是唯一标识，又是接口方法名，parameterType：需要传入的参数的数据类型，resultMap:定义出参，调用已定义的映射管理器的id值(集合类型)-->
+    <select id="findRolesByUserName" parameterType="String" resultMap="userMap">
+        select u.id uid,u.loginAct,r.id,r.role_name
+        FROM tbl_user u LEFT JOIN t_user_role ur
+        ON u.id=ur.user_id LEFT JOIN t_role r ON
+        ur.role_id=r.id WHERE u.loginAct=#{loginAct}
+    </select>
+    <!--id:唯一标识，用作被引用,type:映射的实体类-->
+    <resultMap id="userMap" type="User">
+        <!--column:列名，一一对应property:实体属性名-->
+        <!--标签id特指主键，uid对应上述sql语句中u.id的别名uid
+        (相当于查询出来的结果，作为一个表，uid是此表的列名)-->
+        <id column="uid" property="id"/>
+        <result column="loginAct" property="loginAct"/>
+        <!--角色信息，维护一对多的关系,内部还可嵌套一对一的关系:-->
+
+        <collection property="roles" javaType="list" ofType="Role">
+            <id column="id" property="id"/>
+            <result column="role_name" property="role_name"/>
+        </collection>
+    </resultMap>
+    <!--根据RoleId查询Role对应的所有permission-->
+    <select id="findPermissionsByRoleId" parameterType="String" resultMap="roleMap">
+        SELECT r.id,r.role_name,p.id pid,p.per_name,p.url,p.code
+        FROM t_role r
+        LEFT JOIN t_role_permission rp
+        ON r.id=rp.role_id
+        LEFT JOIN t_permission p
+        ON p.id=rp.p_id
+        WHERE r.id =#{id};
+    </select>
+    <resultMap id="roleMap" type="Role">
+        <!--column:列名，一一对应property:实体属性名-->
+        <!--标签id特指主键，uid对应上述sql语句中u.id的别名uid
+        (相当于查询出来的结果，作为一个表，uid是此表的列名)-->
+        <id column="id" property="id"/>
+        <result column="role_name" property="role_name"/>
+        <!--角色信息，维护一对多的关系,内部还可嵌套一对一的关系:-->
+
+        <collection property="permissionList" javaType="list" ofType="Permission">
+            <id column="pid" property="id"/>
+            <result column="per_name" property="per_name"/>
+            <result column="url" property="url"/>
+            <result column="code" property="code"/>
+            <result column="create_time" property="create_time"/>
+            <result column="parent_id" property="parent_id"/>
+        </collection>
+    </resultMap>
+</mapper>
